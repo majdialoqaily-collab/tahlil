@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>نظام المهارات الرقمية - تحليل نتائج الامتحانات</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:#f1f5f9;color:#0f172a}
+header{background:#fff;border-bottom:3px solid #1e40af;padding:12px 16px;text-align:center}
+header h1{margin:4px 0;font-size:22px;color:#1e40af} header p{margin:2px 0;color:#475569}
+nav{display:flex;gap:8px;justify-content:center;background:#1e40af;padding:8px;flex-wrap:wrap;position:sticky;top:0;z-index:10}
+nav button{border:0;background:#fff;color:#1e40af;padding:9px 16px;border-radius:999px;cursor:pointer;font-weight:700}
+nav button.active{background:#f59e0b;color:#fff}
+.wrap{max-width:1000px;margin:16px auto;padding:0 12px}
+.card{background:#fff;border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+label{display:block;font-weight:700;margin:12px 0 5px} input,select,textarea{width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px} @media(max-width:600px){.grid{grid-template-columns:1fr}}
+.btn{background:#1e40af;color:#fff;border:0;padding:11px 16px;border-radius:8px;cursor:pointer;font-weight:700}
+.btn.gold{background:#f59e0b} .btn.gray{background:#64748b}
+table{width:100%;border-collapse:collapse;margin-top:10px} th,td{border:1px solid #e2e8f0;padding:7px;text-align:center;font-size:14px} th{background:#1e40af;color:#fff}
+.stat{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} @media(max-width:600px){.stat{grid-template-columns:repeat(2,1fr)}}
+.stat div{background:#eff6ff;border-radius:10px;padding:10px;text-align:center} .stat b{display:block;font-size:19px}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px} .sig div{border:1px solid #cbd5e1;border-radius:10px;padding:14px;line-height:2}
+footer.appfoot{text-align:center;color:#475569;font-size:13px;padding:18px;line-height:1.9;background:#fff;border-top:1px solid #e2e8f0}
+.small{font-size:12px;color:#64748b} .ltr{direction:ltr;unicode-bidi:isolate}
+.bar{height:18px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:4px 0} .bar i{display:block;height:100%;background:#1e40af}
+@media print{
+  nav,.no-print,footer.appfoot,.print-hide{display:none!important}
+  body{background:#fff} .wrap{max-width:none;margin:0;padding:0} .card{box-shadow:none;border:0;padding:6px;margin:0}
+  @page{size:A4;margin:10mm 12mm}
+  #reportArea{font-size:11px} #reportArea table th,#reportArea table td{padding:3px;font-size:11px}
+  #reportArea h3{font-size:13px;margin:8px 0 4px}
+  .stat div{padding:5px} .stat b{font-size:14px}
+  .sig{margin-top:18px;page-break-inside:avoid}
+  /* لا يظهر سطر الحقوق في الطباعة نهائياً */
+  .copyright-print{display:none!important}
+}
+</style>
+</head>
+<body>
+<header class="print-hide">
+<img src="logo.png" alt="شعار وزارة التربية والتعليم" onerror="this.style.display='none'" style="height:64px;display:block;margin:0 auto 4px">
+<div style="font-size:13px">المملكة الأردنية الهاشمية - وزارة التربية والتعليم</div>
+<h1>نظام المهارات الرقمية - تحليل نتائج الامتحانات</h1>
+<p>إدخال نسخ ولصق فقط | الحفظ والتقارير</p>
+</header>
+<nav class="no-print">
+<button class="active" onclick="show('home',this)">الصفحة الرئيسية</button>
+<button onclick="show('students',this)">إدخال علامات الطلاب</button>
+<button onclick="show('report',this)">الحفظ والتقارير</button>
+<button onclick="installApp()">تثبيت التطبيق</button>
+</nav>
+<div class="wrap">
+<div id="home" class="card">
+<h2>بيانات المدرسة - الصفحة الرئيسية</h2>
+<div class="grid">
+<div><label>المحافظة</label><select id="gov" onchange="fillDir()"></select></div>
+<div><label>مديرية التربية والتعليم</label><select id="dir"></select></div>
+<div><label>اسم المدرسة</label><input id="school" placeholder="اسم المدرسة"></div>
+<div><label>الصف الدراسي</label><select id="grade" onchange="fillSubj()"></select></div>
+<div><label>المادة الدراسية</label><select id="subject"></select></div>
+<div><label>الشعبة</label><select id="section"><option>أ</option><option>ب</option><option>ج</option><option>د</option></select></div>
+<div><label>اسم المعلم</label><input id="teacher" placeholder="اسم المعلم"></div>
+<div><label>اسم المدير</label><input id="principal" placeholder="اسم المدير"></div>
+<div><label>السنة الدراسية</label><input id="year" value="2026 / 2027"></div>
+<div><label>الفصل الدراسي</label><select id="sem"><option>الفصل الأول</option><option>الفصل الثاني</option></select></div>
+<div><label>العلامة العظمى</label><input id="max" type="number" value="100"></div>
+<div><label>علامة النجاح</label><input id="pass" type="number" value="50"></div>
+</div>
+<p class="small">ملاحظة: اسم المعلم والمدير لا يظهران في رأس التقرير، بل في خانة التوقيعات بآخر صفحة فقط.</p>
+</div>
+
+<div id="students" class="card" style="display:none">
+<h2>إدخال علامات الطلاب - نسخ ولصق فقط</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn" id="bMarks" onclick="mode('marks')">إدخال العلامات فقط</button>
+<button class="btn gray" id="bNames" onclick="mode('names')">إدخال الأسماء والعلامات</button>
+</div>
+<div id="marksMode">
+<label>العلامات النهائية - الصق عمود العلامات هنا (علامة بكل سطر، بشكل عمودي)</label>
+<textarea id="taMarks" rows="10" placeholder="85&#10;66&#10;90"></textarea>
+<div class="small" id="cMarks">عدد العلامات: 0</div>
+</div>
+<div id="namesMode" style="display:none">
+<div class="grid"><div><label>أسماء الطلاب - عمودي</label><textarea id="taNames" rows="10"></textarea></div>
+<div><label>العلامات النهائية - عمودي</label><textarea id="taMarks2" rows="10"></textarea></div></div>
+<div class="small" id="cNames">عدد الأسماء: 0 | عدد العلامات: 0</div>
+</div>
+<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+<button class="btn gold" onclick="addAll()">إضافة الكل دفعة واحدة</button>
+<button class="btn gray" onclick="clearPaste()">مسح</button>
+</div>
+<h3>قائمة الطلاب</h3>
+<input id="search" placeholder="بحث باسم الطالب..." oninput="render()">
+<div id="list"></div>
+</div>
+
+<div id="report" style="display:none">
+<div class="card no-print">
+<h2>الحفظ والتقارير</h2>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn" onclick="saveLocal()">حفظ التحليل الحالي</button>
+<button class="btn gray" onclick="loadLocal()">استرجاع آخر تحليل محفوظ</button>
+<button class="btn gray" onclick="clearAll()">مسح الكل</button>
+</div><p class="small" id="saveMsg"></p>
+</div>
+<div class="card" id="reportArea">
+<div style="text-align:center">
+<img src="logo.png" alt="" onerror="this.style.display='none'" style="height:48px;display:block;margin:0 auto 2px">
+<div style="font-size:14px;font-weight:700">المملكة الأردنية الهاشمية - وزارة التربية والتعليم</div>
+<div id="repHead" style="font-size:13px;line-height:1.9"></div>
+</div>
+<h3 style="text-align:center">تقرير الطلبة - كشف الطلاب</h3>
+<div id="repTable"></div>
+<h3>ملخص الإحصائيات</h3><div class="stat" id="repStats"></div>
+<h3>توزيع التقديرات</h3><div id="repGrades"></div>
+<h3>أعلى 10 طلاب</h3><div id="repTop"></div>
+<div class="sig">
+<div><b>المعلم</b><br>الاسم: <span id="sigT"></span><br>التاريخ: <span id="sigD1"></span><br>التوقيع: ........................</div>
+<div><b>المدير</b><br>الاسم: <span id="sigP"></span><br>التاريخ: <span id="sigD2"></span><br>التوقيع: ........................</div>
+</div>
+<!-- سطر الحقوق لا يظهر في الطباعة إطلاقاً - مخفي بـ CSS -->
+<p class="copyright-print" style="display:none">© جميع الحقوق محفوظة</p>
+</div>
+</div>
+</div>
+<footer class="appfoot">
+<b>© جميع الحقوق محفوظة</b><br>
+لا يحق لأي شخص أخذ الكود البرمجي أو التعديل عليه إلا بموافقة خطية من صاحب التطبيق.<br>
+تم تصميم التطبيق من قبل مجدي العقيلي<br>
+للتواصل: <span class="ltr">majdialoqaily@gmail.com</span> | 0770183434
+</footer>
+<script>
+const govs={"إربد":["قصبة إربد","بني كنانة","الرمثا","الكورة","بني عبيد","المزار الشمالي","الطيبة","الوسطية","الأغوار الشمالية"],"عمّان":["قصبة عمّان","الجامعة","وادي السير","سحاب","الجيزة","الموقر","ناعور"],"الزرقاء":["قصبة الزرقاء","الرصيفة"],"الكرك":["قصبة الكرك","المزار الجنوبي","الأغوار الجنوبية","القصر"],"معان":["قصبة معان","البتراء","الشوبك"],"المفرق":["قصبة المفرق","البادية الشمالية"],"جرش":["قصبة جرش"],"عجلون":["قصبة عجلون"],"مادبا":["قصبة مادبا","ذيبان"],"البلقاء":["قصبة السلط","الشونة الجنوبية","دير علا"],"العقبة":["قصبة العقبة","القويرة"],"الطفيلة":["قصبة الطفيلة","بصيرا"]};
+const subjects={1:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الحاسوب"],2:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الحاسوب"],3:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الحاسوب"],4:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الحاسوب"],5:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الحاسوب"],6:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الحاسوب"],7:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","الحاسوب","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الثقافة المالية"],8:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","الحاسوب","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الثقافة المالية"],9:["اللغة العربية","الرياضيات","العلوم","التربية الإسلامية","الدراسات الاجتماعية","اللغة الإنجليزية","الحاسوب","التربية المهنية","التربية الفنية","التربية الرياضية","التربية الموسيقية","الثقافة المالية"],10:["اللغة العربية","الرياضيات","الفيزياء","الكيمياء","الأحياء","علوم الأرض والبيئة","التربية الإسلامية","اللغة الإنجليزية","التاريخ","الجغرافيا","الحاسوب","التربية المهنية","التربية الفنية","التربية الرياضية","الثقافة المالية"],11:["اللغة العربية","الرياضيات","الفيزياء","الكيمياء","الأحياء","علوم الأرض والبيئة","التربية الإسلامية","اللغة الإنجليزية","التاريخ","الجغرافيا","الحاسوب","التربية المهنية","المهارات الرقمية"],12:["اللغة العربية","الرياضيات","الفيزياء","الكيمياء","الأحياء","علوم الأرض والبيئة","التربية الإسلامية","اللغة الإنجليزية","التاريخ","الجغرافيا","الحاسوب","التربية المهنية","المهارات الرقمية","التربية الإسلامية - تخصص","اللغة العربية - تخصص"]};
+let students=[]; let curMode='marks';
+function fillGov(){document.getElementById('gov').innerHTML=Object.keys(govs).map(k=>`<option>${k}</option>`).join(''); fillDir();}
+function fillDir(){let g=document.getElementById('gov').value; document.getElementById('dir').innerHTML=govs[g].map(k=>`<option>مديرية تربية ${k}</option>`).join('');}
+function fillGrade(){document.getElementById('grade').innerHTML=Array.from({length:12},(_,i)=>`<option value="${i+1}">الصف ${i+1}</option>`).join(''); fillSubj();}
+function fillSubj(){let gr=document.getElementById('grade').value; document.getElementById('subject').innerHTML=subjects[gr].map(s=>`<option>${s}</option>`).join('');}
+function show(id,btn){['home','students','report'].forEach(x=>document.getElementById(x).style.display=(x===id?'block':'none')); document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active'); if(id==='report')renderReport();}
+function mode(m){curMode=m; document.getElementById('marksMode').style.display=m==='marks'?'block':'none'; document.getElementById('namesMode').style.display=m==='names'?'block':'none'; document.getElementById('bMarks').className=m==='marks'?'btn':'btn gray'; document.getElementById('bNames').className=m==='names'?'btn':'btn gray';}
+function norm(s){return s.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace('%','').trim();}
+function parseMarks(t){return t.split('\n').map(norm).filter(x=>x!=='').map(Number).filter(n=>!isNaN(n));}
+function addAll(){if(curMode==='marks'){parseMarks(document.getElementById('taMarks').value).forEach(v=>students.push({name:'طالب '+(students.length+1),mark:v}));}else{let names=document.getElementById('taNames').value.split('\n').map(s=>s.trim()).filter(Boolean); let marks=parseMarks(document.getElementById('taMarks2').value); let n=Math.min(names.length,marks.length); for(let i=0;i<n;i++)students.push({name:names[i],mark:marks[i]});} render(); alert('تمت إضافة الطلاب. إجمالي القائمة الآن: '+students.length+' طالباً');}
+function clearPaste(){['taMarks','taNames','taMarks2'].forEach(id=>document.getElementById(id).value='');}
+function gradeOf(m){let max=Number(document.getElementById('max').value||100); let p=m/max*100; if(p>=90)return'ممتاز'; if(p>=80)return'جيد جداً'; if(p>=70)return'جيد'; if(p>=60)return'مقبول'; if(p>=50)return'ضعيف'; return'راسب';}
+function render(){let q=(document.getElementById('search').value||'').trim(); let rows=students.filter(s=>s.name.includes(q)); document.getElementById('list').innerHTML='<table><tr><th>الرقم</th><th>الاسم</th><th>العلامة</th><th>التقدير</th><th>النتيجة</th><th>حذف</th></tr>'+rows.map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td><input type="number" value="${s.mark}" style="width:70px" onchange="students[${students.indexOf(s)}].mark=Number(this.value);render()"></td><td>${gradeOf(s.mark)}</td><td>${s.mark>=Number(document.getElementById('pass').value||50)?'ناجح':'راسب'}</td><td><button onclick="students.splice(${students.indexOf(s)},1);render()">حذف</button></td></tr>`).join('')+'</table>';}
+function stats(){if(!students.length)return null; let ms=students.map(s=>s.mark); let sum=ms.reduce((a,b)=>a+b,0); let avg=sum/ms.length; let sorted=[...ms].sort((a,b)=>a-b); let med=sorted.length%2?sorted[Math.floor(sorted.length/2)]:(sorted[sorted.length/2-1]+sorted[sorted.length/2])/2; let sd=Math.sqrt(ms.reduce((a,b)=>a+Math.pow(b-avg,2),0)/ms.length); let passN=ms.filter(m=>m>=Number(document.getElementById('pass').value||50)).length; return{avg,max:Math.max(...ms),min:Math.min(...ms),med,sd,range:Math.max(...ms)-Math.min(...ms),pass:passN/ms.length*100,n:ms.length};}
+function renderReport(){let d=new Date(); let ds=String(d.getDate()).padStart(2,'0')+' / '+String(d.getMonth()+1).padStart(2,'0')+' / '+d.getFullYear(); document.getElementById('repHead').innerHTML=`مديرية: ${document.getElementById('dir').value} | المدرسة: ${document.getElementById('school').value||'........'}<br>السنة الدراسية: ${document.getElementById('year').value} | ${document.getElementById('sem').value} | الصف: ${document.getElementById('grade').value} | الشعبة: ${document.getElementById('section').value} | المادة: ${document.getElementById('subject').value}`; document.getElementById('repTable').innerHTML='<table><tr><th>الرقم</th><th>الاسم</th><th>العلامة</th><th>التقدير</th><th>النتيجة</th></tr>'+students.map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.mark}</td><td>${gradeOf(s.mark)}</td><td>${s.mark>=Number(document.getElementById('pass').value||50)?'ناجح':'راسب'}</td></tr>`).join('')+'</table>'; let st=stats(); document.getElementById('repStats').innerHTML=st?`<div>عدد الطلاب<b>${st.n}</b></div><div>المتوسط<b>${st.avg.toFixed(1)}</b></div><div>أعلى علامة<b>${st.max}</b></div><div>أدنى علامة<b>${st.min}</b></div><div>الوسيط<b>${st.med}</b></div><div>الانحراف<b>${st.sd.toFixed(2)}</b></div><div>المدى<b>${st.range}</b></div><div>نسبة النجاح<b>${st.pass.toFixed(1)}%</b></div>`:'<p>لا توجد بيانات بعد</p>'; let counts={}; students.forEach(s=>{let g=gradeOf(s.mark); counts[g]=(counts[g]||0)+1;}); document.getElementById('repGrades').innerHTML=Object.entries(counts).map(([k,v])=>`<div>${k}: ${v}<div class="bar"><i style="width:${students.length?v/students.length*100:0}%"></i></div></div>`).join('')||'لا توجد بيانات'; let top=[...students].sort((a,b)=>b.mark-a.mark).slice(0,10); document.getElementById('repTop').innerHTML='<table><tr><th>الترتيب</th><th>الاسم</th><th>العلامة</th></tr>'+top.map((s,i)=>`<tr><td>${i+1}</td><td>${s.name}</td><td>${s.mark}</td></tr>`).join('')+'</table>'; document.getElementById('sigT').textContent=document.getElementById('teacher').value||'........'; document.getElementById('sigP').textContent=document.getElementById('principal').value||'........'; document.getElementById('sigD1').textContent=ds; document.getElementById('sigD2').textContent=ds;}
+function saveLocal(){localStorage.setItem('tahlil_v1',JSON.stringify({students})); document.getElementById('saveMsg').textContent='تم الحفظ على هذا الجهاز.';}
+function loadLocal(){let d=JSON.parse(localStorage.getItem('tahlil_v1')||'null'); if(!d){document.getElementById('saveMsg').textContent='لا يوجد تحليل محفوظ.';return;} students=d.students||[]; render(); renderReport(); document.getElementById('saveMsg').textContent='تم استرجاع التحليل المحفوظ.';}
+function clearAll(){students=[]; render(); renderReport();}
+function installApp(){alert('للتثبيت: من قائمة المتصفح اختر "تثبيت التطبيق" أو "Add to Home Screen" / "Install App" - سيظهر كأيقونة على سطح المكتب.');}
+document.getElementById('taMarks')?.addEventListener('input',e=>document.getElementById('cMarks').textContent='عدد العلامات: '+parseMarks(e.target.value).length);
+fillGov(); fillGrade(); render();
+</script>
+</body>
+</html>
